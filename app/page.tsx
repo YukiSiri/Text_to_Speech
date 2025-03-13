@@ -1,8 +1,6 @@
 'use client'
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
 import { Mic, Wand2, Globe2, Zap, CheckCircle2, Volume2, ArrowRight } from "lucide-react"
 import { AudioDemo } from "@/components/audio-demo"
 import { MobileNav } from "@/components/mobile-nav"
@@ -83,7 +81,7 @@ export default function LandingPage() {
                     </div>
                     <div className="w-full max-w-sm rounded-lg bg-background/80 p-4 backdrop-blur-sm">
                       <p className="text-center text-sm">
-                        "Transform your text into natural-sounding speech with just a few clicks."
+                        &ldquo;Transform your text into natural-sounding speech with just a few clicks.&rdquo;
                       </p>
                     </div>
                   </div>
