@@ -18,31 +18,80 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, Download, Volume2, Loader2, RefreshCw } from 'lucide-react'
+import { Play, Pause, Download, Volume2, Loader2, RefreshCw, Volume1, Mic2 } from 'lucide-react'
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
+import { convertTextToSpeech } from "@/lib/text-to-speech"
+import { VoiceSettings } from "@/types/tts"
+import { toast } from "sonner"
+
+const LANGUAGES = [
+  { code: "fr-FR", name: "Français" },
+  { code: "en-US", name: "Anglais (États-Unis)" },
+  { code: "en-GB", name: "Anglais (Royaume-Uni)" },
+  { code: "es-ES", name: "Espagnol" },
+  { code: "de-DE", name: "Allemand" },
+  { code: "it-IT", name: "Italien" },
+  { code: "pt-PT", name: "Portugais" },
+  { code: "nl-NL", name: "Néerlandais" },
+  { code: "pl-PL", name: "Polonais" },
+  { code: "ru-RU", name: "Russe" },
+  { code: "ja-JP", name: "Japonais" },
+  { code: "ko-KR", name: "Coréen" },
+  { code: "zh-CN", name: "Chinois (Simplifié)" },
+  { code: "zh-TW", name: "Chinois (Traditionnel)" }
+]
+
+const VOICE_TONES = [
+  { value: 0.25, label: "Très grave" },
+  { value: 0.5, label: "Grave" },
+  { value: 0.75, label: "Bas" },
+  { value: 1, label: "Normal" },
+  { value: 1.25, label: "Haut" },
+  { value: 1.5, label: "Aigu" },
+  { value: 2, label: "Très aigu" },
+  { value: 3, label: "Extrêmement aigu" },
+  { value: 4, label: "Maximum" }
+]
 
 export default function TextToSpeechPage() {
   const [text, setText] = useState("")
-  const [voice, setVoice] = useState("female")
-  const [speed, setSpeed] = useState([1])
-  const [pitch, setPitch] = useState([1])
+  const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
+    language: "fr-FR",
+    gender: "FEMALE",
+    pitch: 1,
+    speakingRate: 1,
+    volumeGainDb: 0
+  })
   const [isConverting, setIsConverting] = useState(false)
   const [isPlaying, setIsPlaying] = useState(false)
   const [audioUrl, setAudioUrl] = useState("")
   const audioRef = useRef<HTMLAudioElement>(null)
 
-  const handleConvert = () => {
-    if (!text.trim()) return
+  const handleConvert = async () => {
+    if (!text.trim()) {
+      toast.error("Veuillez entrer du texte à convertir")
+      return
+    }
     
     setIsConverting(true)
-    
-    // Simulate API call to convert text to speech
-    setTimeout(() => {
+    try {
+      const result = await convertTextToSpeech(text, voiceSettings)
+      
+      if (result.error) {
+        toast.error(result.error)
+        return
+      }
+
+      setAudioUrl(result.audioUrl)
+      toast.success("Conversion réussie !")
+    } catch (error) {
+      toast.error("Une erreur est survenue lors de la conversion")
+      console.error("Erreur de conversion:", error)
+    } finally {
       setIsConverting(false)
-      setAudioUrl("https://example.com/audio.mp3") // This would be the actual URL in a real app
-    }, 1500)
+    }
   }
 
   const handlePlayPause = () => {
@@ -57,7 +106,8 @@ export default function TextToSpeechPage() {
   }
 
   const handleDownload = () => {
-    // In a real app, this would download the actual audio file
+    if (!audioUrl) return
+    
     const link = document.createElement("a")
     link.href = audioUrl
     link.download = "text-to-speech.mp3"
@@ -76,10 +126,15 @@ export default function TextToSpeechPage() {
     return "Normal"
   }
 
-  const getPitchLabel = (pitch: number) => {
-    if (pitch <= 0.5) return "Grave"
-    if (pitch >= 1.5) return "Aigu"
-    return "Moyen"
+  const getToneLabel = (tone: number) => {
+    const selectedTone = VOICE_TONES.find(t => t.value === tone)
+    return selectedTone ? selectedTone.label : "Normal"
+  }
+
+  const getVolumeLabel = (volume: number) => {
+    if (volume <= -6) return "Faible"
+    if (volume >= 6) return "Fort"
+    return "Normal"
   }
 
   return (
@@ -118,50 +173,94 @@ export default function TextToSpeechPage() {
               </div>
               
               <div className="grid gap-6 md:grid-cols-2">
-                <div className="space-y-2">
-                  <Label htmlFor="voice-select">Voix</Label>
-                  <Select value={voice} onValueChange={setVoice}>
-                    <SelectTrigger id="voice-select">
-                      <SelectValue placeholder="Sélectionnez une voix" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="female">Femme</SelectItem>
-                      <SelectItem value="male">Homme</SelectItem>
-                      <SelectItem value="robotic">Robotique</SelectItem>
-                      <SelectItem value="child">Enfant</SelectItem>
-                      <SelectItem value="elderly">Personne âgée</SelectItem>
-                    </SelectContent>
-                  </Select>
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="language-select">Langue</Label>
+                    <Select 
+                      value={voiceSettings.language} 
+                      onValueChange={(value) => setVoiceSettings(prev => ({ ...prev, language: value }))}
+                    >
+                      <SelectTrigger id="language-select">
+                        <SelectValue placeholder="Sélectionnez une langue" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {LANGUAGES.map((lang) => (
+                          <SelectItem key={lang.code} value={lang.code}>
+                            {lang.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="voice-select">Voix</Label>
+                    <Select 
+                      value={voiceSettings.gender} 
+                      onValueChange={(value) => setVoiceSettings(prev => ({ ...prev, gender: value as "FEMALE" | "MALE" }))}
+                    >
+                      <SelectTrigger id="voice-select">
+                        <SelectValue placeholder="Sélectionnez une voix" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="FEMALE">Femme</SelectItem>
+                        <SelectItem value="MALE">Homme</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
                 </div>
                 
                 <div className="space-y-4">
                   <div className="space-y-2">
                     <div className="flex justify-between">
                       <Label htmlFor="speed-slider">Vitesse de lecture</Label>
-                      <span className="text-sm text-muted-foreground">{getSpeedLabel(speed[0])}</span>
+                      <span className="text-sm text-muted-foreground">{getSpeedLabel(voiceSettings.speakingRate)}</span>
                     </div>
                     <Slider
                       id="speed-slider"
                       min={0.5}
                       max={2}
                       step={0.1}
-                      value={speed}
-                      onValueChange={setSpeed}
+                      value={[voiceSettings.speakingRate]}
+                      onValueChange={([value]) => setVoiceSettings(prev => ({ ...prev, speakingRate: value }))}
                     />
                   </div>
                   
                   <div className="space-y-2">
+                    <Label htmlFor="tone-select">Ton de voix</Label>
+                    <Select 
+                      value={voiceSettings.pitch.toString()} 
+                      onValueChange={(value) => {
+                        const pitchValue = parseFloat(value)
+                        setVoiceSettings(prev => ({ ...prev, pitch: pitchValue }))
+                        console.log('Ton de voix sélectionné:', pitchValue)
+                      }}
+                    >
+                      <SelectTrigger id="tone-select">
+                        <SelectValue placeholder="Sélectionnez un ton" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VOICE_TONES.map((tone) => (
+                          <SelectItem key={tone.value} value={tone.value.toString()}>
+                            {tone.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div className="space-y-2">
                     <div className="flex justify-between">
-                      <Label htmlFor="pitch-slider">Hauteur de voix</Label>
-                      <span className="text-sm text-muted-foreground">{getPitchLabel(pitch[0])}</span>
+                      <Label htmlFor="volume-slider">Volume</Label>
+                      <span className="text-sm text-muted-foreground">{getVolumeLabel(voiceSettings.volumeGainDb)}</span>
                     </div>
                     <Slider
-                      id="pitch-slider"
-                      min={0.5}
-                      max={2}
-                      step={0.1}
-                      value={pitch}
-                      onValueChange={setPitch}
+                      id="volume-slider"
+                      min={-6}
+                      max={6}
+                      step={1}
+                      value={[voiceSettings.volumeGainDb]}
+                      onValueChange={([value]) => setVoiceSettings(prev => ({ ...prev, volumeGainDb: value }))}
                     />
                   </div>
                 </div>
@@ -227,7 +326,7 @@ export default function TextToSpeechPage() {
                         
                         <audio 
                           ref={audioRef} 
-                          src="/placeholder.mp3" 
+                          src={audioUrl}
                           onEnded={handleAudioEnded}
                           className="hidden"
                         />
