@@ -53,7 +53,7 @@ export async function convertTextToSpeech(text: string, settings: VoiceSettings)
     const audioUrl = URL.createObjectURL(blob);
 
     return { audioUrl, error: undefined };
-  } catch (error) {
+  } catch {
     return {
       error: "Une erreur est survenue lors de la conversion",
       audioUrl: ''
