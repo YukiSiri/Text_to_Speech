@@ -4,7 +4,7 @@ export const API_CONFIG = {
     ENDPOINTS: {
       SYNTHESIZE: '/text:synthesize'
     },
-    API_KEY: process.env.NEXT_PUBLIC_GOOGLE_TTS_API_KEY,
+    API_KEY: process.env.NEXT_PUBLIC_GOOGLE_TTS_API_KEY || '',
     AUDIO_CONFIG: {
       DEFAULT_LANGUAGE: 'fr-FR',
       DEFAULT_GENDER: 'FEMALE' as const,
@@ -29,6 +29,7 @@ export const API_CONFIG = {
   }
 } as const;
 
-if (!API_CONFIG.GOOGLE_TTS.API_KEY) {
-  throw new Error('La clé API Google Text-to-Speech n\'est pas configurée');
+// Ne pas lancer d'erreur pendant le build
+if (typeof window !== 'undefined' && !API_CONFIG.GOOGLE_TTS.API_KEY) {
+  console.warn('La clé API Google Text-to-Speech n\'est pas configurée');
 } 
