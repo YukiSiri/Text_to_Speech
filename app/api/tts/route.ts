@@ -12,6 +12,23 @@ export async function POST(request: Request) {
       );
     }
 
+    console.log('Clé API:', API_CONFIG.GOOGLE_TTS.API_KEY ? 'Présente' : 'Manquante');
+    
+    if (!API_CONFIG.GOOGLE_TTS.API_KEY) {
+      console.error('La clé API Google Text-to-Speech n\'est pas configurée');
+      return NextResponse.json(
+        { error: 'La clé API n\'est pas configurée' },
+        { status: 500 }
+      );
+    }
+
+    console.log('Envoi de la requête à l\'API Google Text-to-Speech...');
+    console.log('URL:', `${API_CONFIG.GOOGLE_TTS.BASE_URL}${API_CONFIG.GOOGLE_TTS.ENDPOINTS.SYNTHESIZE}`);
+    console.log('Paramètres:', {
+      text: text.substring(0, 50) + '...',
+      settings
+    });
+
     const response = await fetch(
       `${API_CONFIG.GOOGLE_TTS.BASE_URL}${API_CONFIG.GOOGLE_TTS.ENDPOINTS.SYNTHESIZE}?key=${API_CONFIG.GOOGLE_TTS.API_KEY}`,
       {
@@ -23,10 +40,7 @@ export async function POST(request: Request) {
           input: { text },
           voice: {
             languageCode: settings.language,
-            ssmlGender: settings.gender,
-            pitch: settings.pitch,
-            speakingRate: settings.speakingRate,
-            volumeGainDb: settings.volumeGainDb
+            ssmlGender: settings.gender
           },
           audioConfig: {
             audioEncoding: 'MP3',
@@ -40,6 +54,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const error = await response.json();
+      console.error('Erreur de l\'API Google Text-to-Speech:', error);
       return NextResponse.json(
         { error: error.error?.message || "Une erreur est survenue lors de la conversion" },
         { status: response.status }
@@ -47,8 +62,10 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
+    console.log('Réponse reçue de l\'API Google Text-to-Speech');
     return NextResponse.json(data);
-  } catch {
+  } catch (error) {
+    console.error('Erreur lors de la conversion:', error);
     return NextResponse.json(
       { error: "Une erreur est survenue lors de la conversion" },
       { status: 500 }
