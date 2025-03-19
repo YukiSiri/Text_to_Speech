@@ -27,7 +27,7 @@ export function AudioDemo() {
 
   useEffect(() => {
     const session = getCurrentSession();
-    if (session && isSessionValid()) {
+    if (session && isSessionValid(session)) {
       setConversions(session.conversions);
     }
   }, []);
@@ -41,11 +41,6 @@ export function AudioDemo() {
   }, [audioUrl])
 
   const handlePlay = async () => {
-    if (!text.trim()) {
-      toast.error("Veuillez entrer du texte à convertir")
-      return
-    }
-
     if (isPlaying && audioRef.current) {
       audioRef.current.pause()
       setIsPlaying(false)
@@ -54,18 +49,13 @@ export function AudioDemo() {
 
     setIsLoading(true)
     try {
-      const { audioUrl: newAudioUrl, error } = await convertTextToSpeech(text, {
+      const { audioUrl: newAudioUrl } = await convertTextToSpeech(text, {
         language: selectedLanguage,
         gender: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_GENDER,
         pitch: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_PITCH,
         speakingRate: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_SPEAKING_RATE,
         volumeGainDb: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_VOLUME_GAIN_DB
       })
-      
-      if (error) {
-        toast.error(error)
-        return
-      }
 
       if (!newAudioUrl) {
         throw new Error('URL audio non générée');
@@ -80,23 +70,9 @@ export function AudioDemo() {
       if (audioRef.current) {
         audioRef.current.src = newAudioUrl
         audioRef.current.load()
-
-        const playPromise = audioRef.current.play()
-        if (playPromise !== undefined) {
-          playPromise
-            .then(() => {
-              setIsPlaying(true)
-              const conversion: Conversion = {
-                id: crypto.randomUUID(),
-                text,
-                language: selectedLanguage,
-                createdAt: new Date()
-              };
-              addConversionToSession(conversion);
-              setConversions(prev => [conversion, ...prev]);
-            })
-            .catch(() => toast.error("Erreur lors de la lecture de l'audio"))
-        }
+        audioRef.current.play()
+          .then(() => setIsPlaying(true))
+          .catch(() => toast.error("Erreur lors de la lecture de l'audio"))
       }
     } catch (error) {
       toast.error("Une erreur est survenue lors de la conversion")
@@ -114,18 +90,13 @@ export function AudioDemo() {
 
     setIsLoading(true)
     try {
-      const { audioUrl: newAudioUrl, error } = await convertTextToSpeech(conversion.text, {
+      const { audioUrl: newAudioUrl } = await convertTextToSpeech(conversion.text, {
         language: conversion.language,
         gender: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_GENDER,
         pitch: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_PITCH,
         speakingRate: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_SPEAKING_RATE,
         volumeGainDb: API_CONFIG.GOOGLE_TTS.AUDIO_CONFIG.DEFAULT_VOLUME_GAIN_DB
       })
-
-      if (error) {
-        toast.error(error)
-        return
-      }
 
       if (!newAudioUrl) {
         throw new Error('URL audio non générée');

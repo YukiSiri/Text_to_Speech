@@ -1,89 +1,49 @@
-import { Session, User, Conversion, SessionResponse } from '@/types/tts';
+import { Conversion } from "./types"
 
-const SESSION_KEY = 'tts_session';
-const USER_KEY = 'tts_user';
+interface Session {
+  id: string
+  userId?: string
+  conversions: Conversion[]
+  createdAt: string
+}
+
+const SESSION_KEY = 'tts_session'
+const SESSION_EXPIRY = 24 * 60 * 60 * 1000 // 24 heures en millisecondes
 
 export function getCurrentSession(): Session | null {
-  if (typeof window === 'undefined') return null;
-  
-  const sessionStr = localStorage.getItem(SESSION_KEY);
-  if (!sessionStr) return null;
+  if (typeof window === 'undefined') return null
 
-  try {
-    const session = JSON.parse(sessionStr);
-    return {
-      ...session,
-      createdAt: new Date(session.createdAt),
-      lastActive: new Date(session.lastActive),
-      conversions: session.conversions.map((conv: any) => ({
-        ...conv,
-        createdAt: new Date(conv.createdAt)
-      }))
-    };
-  } catch (error) {
-    console.error('Erreur lors de la lecture de la session:', error);
-    return null;
+  const sessionStr = localStorage.getItem(SESSION_KEY)
+  if (!sessionStr) return null
+
+  const session: Session = JSON.parse(sessionStr)
+  if (!isSessionValid(session)) {
+    localStorage.removeItem(SESSION_KEY)
+    return null
   }
+
+  return session
 }
 
-export function getCurrentUser(): User | null {
-  if (typeof window === 'undefined') return null;
-  
-  const userStr = localStorage.getItem(USER_KEY);
-  if (!userStr) return null;
-
-  try {
-    const user = JSON.parse(userStr);
-    return {
-      ...user,
-      createdAt: new Date(user.createdAt)
-    };
-  } catch (error) {
-    console.error('Erreur lors de la lecture de l\'utilisateur:', error);
-    return null;
-  }
-}
-
-export function createSession(user: User): Session {
-  const session: Session = {
-    id: crypto.randomUUID(),
-    userId: user.id,
-    createdAt: new Date(),
-    lastActive: new Date(),
-    conversions: []
-  };
-
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
-  localStorage.setItem(USER_KEY, JSON.stringify(user));
-
-  return session;
-}
-
-export function updateSession(session: Session): void {
-  localStorage.setItem(SESSION_KEY, JSON.stringify(session));
+export function isSessionValid(session: Session): boolean {
+  const createdAt = new Date(session.createdAt).getTime()
+  const now = new Date().getTime()
+  return now - createdAt < SESSION_EXPIRY
 }
 
 export function addConversionToSession(conversion: Conversion): void {
-  const session = getCurrentSession();
-  if (!session) return;
+  if (typeof window === 'undefined') return
 
-  session.conversions.unshift(conversion);
-  session.lastActive = new Date();
-  updateSession(session);
-}
-
-export function clearSession(): void {
-  localStorage.removeItem(SESSION_KEY);
-  localStorage.removeItem(USER_KEY);
-}
-
-export function isSessionValid(): boolean {
-  const session = getCurrentSession();
-  if (!session) return false;
-
-  const now = new Date();
-  const lastActive = new Date(session.lastActive);
-  const hoursDiff = (now.getTime() - lastActive.getTime()) / (1000 * 60 * 60);
-
-  return hoursDiff < 24; // Session valide pendant 24 heures
+  const session = getCurrentSession()
+  if (!session) {
+    const newSession: Session = {
+      id: crypto.randomUUID(),
+      conversions: [conversion],
+      createdAt: new Date().toISOString()
+    }
+    localStorage.setItem(SESSION_KEY, JSON.stringify(newSession))
+  } else {
+    session.conversions.unshift(conversion)
+    localStorage.setItem(SESSION_KEY, JSON.stringify(session))
+  }
 } 

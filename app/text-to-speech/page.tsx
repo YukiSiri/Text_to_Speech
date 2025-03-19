@@ -18,7 +18,7 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card"
-import { Play, Pause, Download, Volume2, Loader2, RefreshCw, Volume1, Mic2 } from 'lucide-react'
+import { Play, Pause, Download, Volume2, Loader2, RefreshCw } from 'lucide-react'
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
 import Link from "next/link"
@@ -124,11 +124,6 @@ export default function TextToSpeechPage() {
     if (speed <= 0.5) return "Lent"
     if (speed >= 1.5) return "Rapide"
     return "Normal"
-  }
-
-  const getToneLabel = (tone: number) => {
-    const selectedTone = VOICE_TONES.find(t => t.value === tone)
-    return selectedTone ? selectedTone.label : "Normal"
   }
 
   const getVolumeLabel = (volume: number) => {
