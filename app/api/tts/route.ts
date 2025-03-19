@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import { API_CONFIG } from '@/lib/configTTS';
-import { VoiceSettings } from '@/types/tts';
 
 export async function POST(request: Request) {
   try {
@@ -49,7 +48,7 @@ export async function POST(request: Request) {
 
     const data = await response.json();
     return NextResponse.json(data);
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       { error: "Une erreur est survenue lors de la conversion" },
       { status: 500 }
