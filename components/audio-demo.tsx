@@ -8,10 +8,8 @@ import { convertTextToSpeech } from "@/lib/text-to-speech"
 import { toast } from "sonner"
 import { getCurrentSession, isSessionValid } from "@/lib/session"
 import { Conversion } from "@/lib/types"
-import { API_CONFIG } from '@/lib/configTTS'
+import { API_CONFIG, SupportedLanguage } from '@/lib/configTTS'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-
-type SupportedLanguage = typeof API_CONFIG.GOOGLE_TTS.SUPPORTED_LANGUAGES[number]['code']
 
 export function AudioDemo() {
   const [text, setText] = useState(
@@ -151,9 +149,9 @@ export function AudioDemo() {
                     <SelectValue placeholder="Sélectionnez la langue" />
                   </SelectTrigger>
                   <SelectContent>
-                    {API_CONFIG.GOOGLE_TTS.SUPPORTED_LANGUAGES.map((lang) => (
-                      <SelectItem key={lang.code} value={lang.code}>
-                        {lang.name}
+                    {Object.entries(API_CONFIG.GOOGLE_TTS.SUPPORTED_LANGUAGES).map(([code, name]) => (
+                      <SelectItem key={code} value={code}>
+                        {name}
                       </SelectItem>
                     ))}
                   </SelectContent>
