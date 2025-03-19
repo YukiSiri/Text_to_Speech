@@ -6,7 +6,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { Play, Pause, Volume2, Loader2, History } from "lucide-react"
 import { convertTextToSpeech } from "@/lib/text-to-speech"
 import { toast } from "sonner"
-import { getCurrentSession, addConversionToSession, isSessionValid } from "@/lib/session"
+import { getCurrentSession, isSessionValid } from "@/lib/session"
 import { Conversion } from "@/lib/types"
 import { API_CONFIG } from '@/lib/configTTS'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
@@ -74,7 +74,7 @@ export function AudioDemo() {
           .then(() => setIsPlaying(true))
           .catch(() => toast.error("Erreur lors de la lecture de l'audio"))
       }
-    } catch (error) {
+    } catch {
       toast.error("Une erreur est survenue lors de la conversion")
     } finally {
       setIsLoading(false)
@@ -115,7 +115,7 @@ export function AudioDemo() {
           .then(() => setIsPlaying(true))
           .catch(() => toast.error("Erreur lors de la lecture de l'audio"))
       }
-    } catch (error) {
+    } catch {
       toast.error("Une erreur est survenue lors de la conversion")
     } finally {
       setIsLoading(false)
