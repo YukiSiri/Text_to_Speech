@@ -4,36 +4,13 @@ import { Button } from "@/components/ui/button"
 import { Mic, Wand2, Globe2, Zap, CheckCircle2, Volume2, ArrowRight } from "lucide-react"
 import { AudioDemo } from "@/components/audio-demo"
 import { MobileNav } from "@/components/mobile-nav"
+import { Nav } from "@/components/nav"
+import { Footer } from "@/components/footer"
 
 export default function LandingPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
-      <header className="sticky top-0 left-0 z-40 w-full border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">SpeechCraft</span>
-          </div>
-          <nav className="hidden md:flex items-center gap-6">
-            <Link href="/text-to-speech" className="text-sm font-medium hover:text-primary">
-              Utiliser l&apos;application
-            </Link>
-            <Link href="/history" className="text-sm font-medium hover:text-primary">
-              Regardez votre historique
-            </Link>
-            <Link href="/about" className="text-sm font-medium hover:text-primary">
-              Qui sommes-nous ?
-            </Link>
-          </nav>
-          <div className="hidden md:flex items-center gap-4">
-            <Link href="#" className="text-sm font-medium hover:text-primary">
-              Connexion
-            </Link>
-            <Button>Commencer</Button>
-          </div>
-          <MobileNav />
-        </div>
-      </header>
+      <Nav/>
       <main className="flex-1">
         <section className="py-12 md:py-24 lg:py-32 xl:py-48">
           <div className="container px-4 md:px-6">
@@ -179,28 +156,9 @@ export default function LandingPage() {
         </section>
 
       </main>
-      <footer className="border-t py-6 md:py-10">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5 text-primary" />
-            <span className="text-lg font-bold">SpeechCraft</span>
-          </div>
-          <p className="text-center text-sm text-muted-foreground md:text-left">
-            &copy; {new Date().getFullYear()} SpeechCraft. Tous droits réservés.
-          </p>
-          <div className="flex gap-4">
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
-              Conditions
-            </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
-              Confidentialité
-            </Link>
-            <Link href="#" className="text-sm text-muted-foreground hover:text-primary">
-              Contact
-            </Link>
-          </div>
-        </div>
-      </footer>
+      
+      <Footer/>
+
     </div>
   )
 }
