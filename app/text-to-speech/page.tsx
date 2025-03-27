@@ -21,7 +21,6 @@ import {
 import { Play, Pause, Download, Volume2, Loader2, RefreshCw } from 'lucide-react'
 import { Label } from "@/components/ui/label"
 import { Separator } from "@/components/ui/separator"
-import Link from "next/link"
 import { convertTextToSpeech } from "@/lib/text-to-speech"
 import { VoiceSettings } from "@/types/tts"
 import { toast } from "sonner"

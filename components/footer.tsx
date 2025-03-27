@@ -1,5 +1,3 @@
-
-
 import Link from "next/link"
 import { Volume2 } from "lucide-react"
 
@@ -20,7 +18,7 @@ export function Footer() {
 
                 <div className="flex gap-4">
                     <Link href="/text-to-speech" className="text-sm text-muted-foreground hover:text-primary">
-                        Utilisez l'application
+                        Utilisez l&apos;application
                     </Link>
                     <Link href="/history" className="text-sm text-muted-foreground hover:text-primary">
                         Regardez Votre historique

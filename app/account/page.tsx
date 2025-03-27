@@ -8,6 +8,7 @@ import { Textarea } from "@/components/ui/textarea"
 import { User, Settings, Bell, Shield, LogOut, Camera, Save } from 'lucide-react'
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import Image from 'next/image'
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile")
@@ -22,11 +23,7 @@ export default function AccountPage() {
               <div className="flex flex-col items-center space-y-4 rounded-lg border bg-background p-6 shadow-sm">
                 <div className="relative">
                   <div className="h-24 w-24 overflow-hidden rounded-full bg-primary/10">
-                    <img
-                      src="/placeholder.svg?height=96&width=96"
-                      alt="Profile"
-                      className="h-full w-full object-cover"
-                    />
+                    <Image src="/path/to/image.jpg" alt="Description" width={500} height={300} />
                   </div>
                   <button className="absolute bottom-0 right-0 rounded-full bg-primary p-1 text-primary-foreground shadow-sm">
                     <Camera className="h-4 w-4" />

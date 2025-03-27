@@ -1,9 +1,7 @@
 'use client'
-import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Mic, Wand2, Globe2, Zap, CheckCircle2, Volume2, ArrowRight } from "lucide-react"
 import { AudioDemo } from "@/components/audio-demo"
-import { MobileNav } from "@/components/mobile-nav"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
 
