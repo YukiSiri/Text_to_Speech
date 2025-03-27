@@ -21,6 +21,8 @@ import {
 import { Badge } from "@/components/ui/badge"
 import { Play, Pause, Download, Volume2, Trash2 } from 'lucide-react'
 import { format } from "date-fns"
+import { Nav } from "@/components/nav"
+import { Footer } from "@/components/footer"
 
 // Mock data for demonstration purposes
 const mockHistory = [
@@ -118,25 +120,10 @@ export default function HistoryPage() {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">Historique Texte-Voix</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/text-to-speech" className="text-sm font-medium hover:text-primary">
-              Texte-Voix
-            </Link>
-            <Link href="/" className="text-sm font-medium hover:text-primary">
-              Accueil
-            </Link>
-          </div>
-        </div>
-      </header>
+    <div className="flex justify-center items-center min-h-screen flex-col">
+      <Nav/>
       
-      <main className="flex-1 container py-8">
+      <main className="flex-1 justify-center items-center container py-8">
         <div className="mx-auto max-w-6xl">
           <Card>
             <CardHeader>
@@ -253,17 +240,7 @@ export default function HistoryPage() {
         </div>
       </main>
       
-      <footer className="border-t py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5 text-primary" />
-            <span className="text-lg font-bold">Texte-Voix</span>
-          </div>
-          <p className="text-center text-sm text-muted-foreground md:text-left">
-            &copy; {new Date().getFullYear()} Convertisseur Texte-Voix. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   )
 }

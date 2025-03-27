@@ -29,7 +29,7 @@ export function Nav() {
                     </Link>
                 </div>
                 <div className="hidden md:flex items-center gap-4 w-1/5">
-                    <Link href="#" className="text-sm font-medium hover:text-primary">
+                    <Link href="/login" className="text-sm font-medium hover:text-primary">
                         Connexion
                     </Link>
                     <Button>Commencer</Button>

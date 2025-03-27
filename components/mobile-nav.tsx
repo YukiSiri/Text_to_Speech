@@ -17,9 +17,9 @@ export function MobileNav() {
       {isOpen && (
         <div className="fixed top-0 right-0 inset-0 z-50 flex flex-col w-screen bg-background/95 backdrop-blur-sm">
           <div className="flex h-16 items-center justify-between px-4">
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2" onClick={() => setIsOpen(false)}>
               <span className="text-xl font-bold">SpeechCraft</span>
-            </div>
+            </Link>
             <Button variant="ghost" size="icon" onClick={() => setIsOpen(false)}>
               <X className="h-6 w-6" />
               <span className="sr-only">Close menu</span>

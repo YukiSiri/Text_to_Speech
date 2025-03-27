@@ -14,29 +14,13 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 import { Volume2, Code, FileText, Mail, Github, Twitter, ExternalLink, BookOpen, MessageSquare, HelpCircle } from 'lucide-react'
+import { Nav } from "@/components/nav"
+import { Footer } from "@/components/footer"
 
 export default function AboutPage() {
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
-      <header className="sticky top-0 z-40 w-full border-b bg-background">
-        <div className="container flex h-16 items-center justify-between py-4">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-6 w-6 text-primary" />
-            <span className="text-xl font-bold">À propos de SpeechCraft</span>
-          </div>
-          <div className="flex items-center gap-4">
-            <Link href="/text-to-speech" className="text-sm font-medium hover:text-primary">
-              Texte-Voix
-            </Link>
-            <Link href="/history" className="text-sm font-medium hover:text-primary">
-              Historique
-            </Link>
-            <Link href="/" className="text-sm font-medium hover:text-primary">
-              Accueil
-            </Link>
-          </div>
-        </div>
-      </header>
+      <Nav/>
       
       <main className="flex-1 container py-8">
         <div className="mx-auto max-w-4xl">
@@ -288,17 +272,7 @@ export default function AboutPage() {
         </div>
       </main>
       
-      <footer className="border-t py-6">
-        <div className="container flex flex-col items-center justify-between gap-4 md:flex-row">
-          <div className="flex items-center gap-2">
-            <Volume2 className="h-5 w-5 text-primary" />
-            <span className="text-lg font-bold">SpeechCraft</span>
-          </div>
-          <p className="text-center text-sm text-muted-foreground md:text-left">
-            &copy; {new Date().getFullYear()} SpeechCraft. Tous droits réservés.
-          </p>
-        </div>
-      </footer>
+      <Footer/>
     </div>
   )
 }
