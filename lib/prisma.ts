@@ -1,18 +1,9 @@
 import { PrismaClient } from '@prisma/client'
 
-// Empêcher plusieurs instances de Prisma Client en développement
-// à cause du rechargement à chaud (hot-reloading)
-const globalForPrisma = global as unknown as { prisma: PrismaClient | undefined }
+// Éviter les instances multiples en développement
+const globalForPrisma = global as unknown as { prisma: PrismaClient }
 
-export const prisma = globalForPrisma.prisma ?? new PrismaClient({
-  log: process.env.NODE_ENV === 'development' ? ['query', 'error', 'warn'] : ['error'],
-  datasources: {
-    db: {
-      url: process.env.DATABASE_URL?.replace(':5432', ':5433') ||
-          "postgresql://postgres:rootroot@localhost:5433/text_to_speech"
-    },
-  },
-})
+export const prisma = globalForPrisma.prisma || new PrismaClient()
 
 if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma
 
