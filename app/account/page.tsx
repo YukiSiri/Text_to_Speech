@@ -1,7 +1,6 @@
 "use client"
 
-import { useState } from "react"
-import Link from "next/link"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
@@ -9,9 +8,73 @@ import { User, Settings, Bell, Shield, LogOut, Camera, Save } from 'lucide-react
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
 import Image from 'next/image'
+import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
+
+interface UserData {
+  id: string | number;
+  prenom: string;
+  nom: string;
+  email: string;
+}
 
 export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile")
+  const [userData, setUserData] = useState<UserData | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
+  const { user, logout } = useAuth()
+
+  useEffect(() => {
+    if (user) {
+      // Conversion des propriétés de user vers le format attendu par UserData
+      setUserData({
+        id: parseInt(user.id),
+        prenom: user.firstName || "",
+        nom: user.lastName || "",
+        email: user.email || ""
+      });
+      setIsLoading(false);
+    }
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!userData) return
+
+    setIsSaving(true)
+    try {
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du profil')
+      }
+
+      toast.success('Profil mis à jour avec succès')
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la mise à jour du profil')
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    )
+  }
+
+  if (!userData) {
+    return null
+  }
 
   return (
     <div className="flex min-h-screen justify-center items-center flex-col">
@@ -30,8 +93,8 @@ export default function AccountPage() {
                   </button>
                 </div>
                 <div className="text-center">
-                  <h3 className="text-xl font-bold">Marie Dupont</h3>
-                  <p className="text-sm text-muted-foreground">marie@example.com</p>
+                  <h3 className="text-xl font-bold">{userData.prenom} {userData.nom}</h3>
+                  <p className="text-sm text-muted-foreground">{userData.email}</p>
                 </div>
               </div>
               <nav className="flex flex-col space-y-1">
@@ -71,13 +134,13 @@ export default function AccountPage() {
                   <Shield className="h-4 w-4" />
                   Sécurité
                 </button>
-                <Link
-                  href="/login"
+                <button
+                  onClick={logout}
                   className="flex items-center gap-2 rounded-lg px-3 py-2 text-sm text-red-500 hover:bg-red-50 hover:text-red-600"
                 >
                   <LogOut className="h-4 w-4" />
                   Déconnexion
-                </Link>
+                </button>
               </nav>
             </div>
             <div className="space-y-6">
@@ -95,20 +158,33 @@ export default function AccountPage() {
                         <label htmlFor="first-name" className="text-sm font-medium">
                           Prénom
                         </label>
-                        <Input id="first-name" defaultValue="Marie" />
+                        <Input 
+                          id="first-name" 
+                          value={userData.prenom}
+                          onChange={(e) => setUserData({ ...userData, prenom: e.target.value })}
+                        />
                       </div>
                       <div className="space-y-2">
                         <label htmlFor="last-name" className="text-sm font-medium">
                           Nom
                         </label>
-                        <Input id="last-name" defaultValue="Dupont" />
+                        <Input 
+                          id="last-name" 
+                          value={userData.nom}
+                          onChange={(e) => setUserData({ ...userData, nom: e.target.value })}
+                        />
                       </div>
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="email" className="text-sm font-medium">
                         Email
                       </label>
-                      <Input id="email" type="email" defaultValue="marie@example.com" />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={userData.email}
+                        onChange={(e) => setUserData({ ...userData, email: e.target.value })}
+                      />
                     </div>
                     <div className="space-y-2">
                       <label htmlFor="bio" className="text-sm font-medium">
@@ -121,9 +197,22 @@ export default function AccountPage() {
                       />
                     </div>
                     <div className="flex justify-end">
-                      <Button className="gap-1">
-                        <Save className="h-4 w-4" />
-                        Enregistrer
+                      <Button 
+                        className="gap-1" 
+                        onClick={handleSaveProfile}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Enregistrement...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            Enregistrer
+                          </>
+                        )}
                       </Button>
                     </div>
                   </div>
