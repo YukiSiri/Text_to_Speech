@@ -22,14 +22,17 @@ export const authOptions: NextAuthOptions = {
           })
 
           if (!user || !(await bcrypt.compare(credentials.password, user.password))) {
+            console.log("Échec d'authentification pour:", credentials.email)
             return null
           }
 
+          console.log("Authentification réussie pour:", credentials.email)
           return {
             id: user.id.toString(),
             email: user.email,
             firstName: user.firstName,
-            lastName: user.lastName
+            lastName: user.lastName,
+            name: `${user.firstName} ${user.lastName}` // Ajout du champ name pour compatibilité
           }
         } catch (error) {
           console.error("Erreur d'authentification:", error)
@@ -44,6 +47,7 @@ export const authOptions: NextAuthOptions = {
   },
   pages: {
     signIn: '/login',
+    error: '/login', // Page d'erreur d'authentification
   },
   callbacks: {
     async jwt({ token, user }) {
@@ -51,6 +55,7 @@ export const authOptions: NextAuthOptions = {
         token.id = user.id
         token.firstName = user.firstName
         token.lastName = user.lastName
+        token.email = user.email
       }
       return token
     },
@@ -59,10 +64,48 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string
         session.user.firstName = token.firstName as string
         session.user.lastName = token.lastName as string
+        session.user.email = token.email as string
       }
       return session
     }
   },
+  cookies: {
+    sessionToken: {
+      name: `next-auth.session-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production"
+      }
+    },
+    callbackUrl: {
+      name: `next-auth.callback-url`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production"
+      }
+    },
+    csrfToken: {
+      name: `next-auth.csrf-token`,
+      options: {
+        httpOnly: true,
+        sameSite: "lax",
+        path: "/",
+        secure: process.env.NODE_ENV === "production"
+      }
+    }
+  },
   secret: process.env.NEXTAUTH_SECRET,
-  debug: false
+  debug: process.env.NODE_ENV === "development",
+  logger: {
+    error(code, metadata) {
+      console.error(`Erreur NextAuth [${code}]:`, metadata)
+    },
+    warn(code) {
+      console.warn(`Avertissement NextAuth [${code}]`)
+    }
+  }
 }
