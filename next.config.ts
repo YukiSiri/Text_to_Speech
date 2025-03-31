@@ -1,7 +1,24 @@
-import type { NextConfig } from "next";
+/** @type {import('next').NextConfig} */
 
-const nextConfig: NextConfig = {
-  /* config options here */
+const nextConfig = {
+    reactStrictMode: true,
+    swcMinify: true,
+    experimental: {
+        appDir: true,
+    },
+    headers: async () => {
+        return [
+            {
+                source: '/:path*',
+                headers: [
+                    {
+                        key: 'Cache-Control',
+                        value: 'no-store, must-revalidate',
+                    },
+                ],
+            },
+        ];
+    },
 };
 
-export default nextConfig;
+module.exports = nextConfig;
