@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useCallback } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { 
@@ -19,65 +19,64 @@ import {
   TableRow 
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, Download, Volume2, Trash2 } from 'lucide-react'
+import { Play, Pause, Download, Volume2, Trash2, Loader2 } from 'lucide-react'
 import { format } from "date-fns"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import { toast } from "sonner"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
-// Mock data for demonstration purposes
-const mockHistory = [
-  {
-    id: "1",
-    text: "Bienvenue sur notre convertisseur texte-voix. Voici un exemple de la qualité vocale que vous pouvez attendre de notre service.",
-    voice: "female",
-    speed: 1.0,
-    pitch: 1.0,
-    createdAt: new Date(2023, 2, 15, 14, 30),
-    audioUrl: "/placeholder.mp3"
-  },
-  {
-    id: "2",
-    text: "L&apos;intelligence artificielle transforme notre façon d&apos;interagir avec la technologie. Les interfaces vocales deviennent de plus en plus naturelles et réactives.",
-    voice: "male",
-    speed: 1.2,
-    pitch: 0.9,
-    createdAt: new Date(2023, 2, 14, 10, 15),
-    audioUrl: "/placeholder.mp3"
-  },
-  {
-    id: "3",
-    text: "Ceci est un test de l&apos;option voix robotique. Notez la différence avec les voix plus naturelles.",
-    voice: "robotic",
-    speed: 0.8,
-    pitch: 1.3,
-    createdAt: new Date(2023, 2, 13, 16, 45),
-    audioUrl: "/placeholder.mp3"
-  },
-  {
-    id: "4",
-    text: "Le rapide renard brun saute par-dessus le chien paresseux. Cette phrase contient toutes les lettres de l&apos;alphabet français.",
-    voice: "child",
-    speed: 1.1,
-    pitch: 1.5,
-    createdAt: new Date(2023, 2, 12, 9, 20),
-    audioUrl: "/placeholder.mp3"
-  },
-  {
-    id: "5",
-    text: "Merci d&apos;utiliser notre service de conversion texte-voix. Nous espérons que vous le trouverez utile pour vos projets.",
-    voice: "elderly",
-    speed: 0.9,
-    pitch: 0.7,
-    createdAt: new Date(2023, 2, 11, 13, 10),
-    audioUrl: "/placeholder.mp3"
-  }
-]
+interface HistoryItem {
+  id: number
+  text: string
+  voice: string
+  speed: number
+  pitch: number
+  createdAt: string
+  audioUrl: string
+}
 
 export default function HistoryPage() {
-  const [history, setHistory] = useState(mockHistory)
-  const [playingId, setPlayingId] = useState<string | null>(null)
+  const [history, setHistory] = useState<HistoryItem[]>([])
+  const [playingId, setPlayingId] = useState<number | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const { user, loading } = useAuth()
+  const router = useRouter()
 
-  const handlePlay = (id: string) => {
+  const fetchHistory = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      const response = await fetch('/api/history');
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login');
+          return;
+        }
+        throw new Error('Erreur lors de la récupération de l\'historique');
+      }
+      const data = await response.json();
+      setHistory(data);
+    } catch (error) {
+      console.error('Erreur:', error);
+      toast.error('Erreur lors de la récupération de l\'historique');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [router]);
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login');
+      return;
+    }
+
+    if (user) {
+      fetchHistory();
+    }
+  }, [user, loading, router, fetchHistory]);
+
+  const handlePlay = (id: number) => {
     if (playingId === id) {
       setPlayingId(null)
     } else {
@@ -85,10 +84,9 @@ export default function HistoryPage() {
     }
   }
 
-  const handleDownload = (id: string) => {
+  const handleDownload = (id: number) => {
     const item = history.find(item => item.id === id)
     if (item) {
-      // In a real app, this would download the actual audio file
       const link = document.createElement("a")
       link.href = item.audioUrl
       link.download = `texte-voix-${id}.mp3`
@@ -98,149 +96,169 @@ export default function HistoryPage() {
     }
   }
 
-  const handleDelete = (id: string) => {
-    setHistory(history.filter(item => item.id !== id))
+  const handleDelete = async (id: number) => {
+    try {
+      const response = await fetch('/api/history', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      })
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          router.push('/login')
+          return
+        }
+        throw new Error('Erreur lors de la suppression')
+      }
+
+      setHistory(history.filter(item => item.id !== id))
+      toast.success('Conversion supprimée avec succès')
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la suppression')
+    }
   }
 
   const getVoiceBadgeColor = (voice: string) => {
     switch (voice) {
-      case "female":
-        return "bg-pink-100 text-pink-800 hover:bg-pink-100"
-      case "male":
-        return "bg-blue-100 text-blue-800 hover:bg-blue-100"
-      case "robotic":
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100"
-      case "child":
-        return "bg-yellow-100 text-yellow-800 hover:bg-yellow-100"
-      case "elderly":
-        return "bg-purple-100 text-purple-800 hover:bg-purple-100"
+      case 'fr-FR':
+        return 'bg-blue-500'
+      case 'en-US':
+        return 'bg-green-500'
       default:
-        return "bg-gray-100 text-gray-800 hover:bg-gray-100"
+        return 'bg-gray-500'
     }
   }
 
+  if (loading || isLoading) {
+    return (
+      <div className="flex min-h-screen justify-center items-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    )
+  }
+
+  if (!user) {
+    return null
+  }
+
   return (
-    <div className="flex justify-center items-center min-h-screen flex-col">
-      <Nav/>
-      
-      <main className="flex-1 justify-center items-center container py-8">
-        <div className="mx-auto max-w-6xl">
-          <Card>
-            <CardHeader>
-              <CardTitle>Historique des conversions</CardTitle>
-              <CardDescription>
-                Consultez et gérez vos conversions texte-voix précédentes.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              {history.length > 0 ? (
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[300px]">Texte</TableHead>
-                      <TableHead>Paramètres</TableHead>
-                      <TableHead>Date</TableHead>
-                      <TableHead className="text-right">Actions</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {history.map((item) => (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium">
-                          <div className="line-clamp-2">{item.text}</div>
-                        </TableCell>
-                        <TableCell>
-                          <div className="flex flex-col gap-2">
-                            <div className="flex items-center gap-2">
-                              <Badge className={getVoiceBadgeColor(item.voice)} variant="outline">
-                                {item.voice === "female" ? "Femme" :
-                                 item.voice === "male" ? "Homme" :
-                                 item.voice === "robotic" ? "Robotique" :
-                                 item.voice === "child" ? "Enfant" :
-                                 item.voice === "elderly" ? "Personne âgée" : item.voice}
-                              </Badge>
-                              <span className="text-xs text-muted-foreground">
-                                Vitesse: {item.speed.toFixed(1)} | Hauteur: {item.pitch.toFixed(1)}
-                              </span>
-                            </div>
-                          </div>
-                        </TableCell>
-                        <TableCell>
-                          {format(item.createdAt, "d MMM yyyy HH:mm")}
-                        </TableCell>
-                        <TableCell className="text-right">
-                          <div className="flex justify-end gap-2">
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handlePlay(item.id)}
-                              title={playingId === item.id ? "Pause" : "Lecture"}
-                            >
-                              {playingId === item.id ? (
-                                <Pause className="h-4 w-4" />
-                              ) : (
-                                <Play className="h-4 w-4" />
-                              )}
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDownload(item.id)}
-                              title="Télécharger"
-                            >
-                              <Download className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => handleDelete(item.id)}
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-                          {playingId === item.id && (
-                            <div className="mt-2 flex items-center justify-end gap-2">
-                              <Volume2 className="h-4 w-4 text-primary animate-pulse" />
-                              <div className="flex gap-1">
-                                {Array.from({ length: 3 }).map((_, i) => (
-                                  <div 
-                                    key={i} 
-                                    className="h-4 w-1 animate-pulse rounded-full bg-primary" 
-                                    style={{ 
-                                      animationDelay: `${i * 0.1}s`,
-                                      animationDuration: '0.8s'
-                                    }} 
-                                  />
-                                ))}
-                              </div>
-                            </div>
-                          )}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              ) : (
-                <div className="py-12 text-center">
-                  <Volume2 className="mx-auto h-12 w-12 text-muted-foreground" />
-                  <h3 className="mt-4 text-lg font-medium">Aucun historique de conversion</h3>
-                  <p className="mt-2 text-sm text-muted-foreground">
-                    Vous n&apos;avez pas encore converti de texte en parole.
+    <div className="flex min-h-screen flex-col">
+      <Nav />
+      <main className="flex-1 py-12 md:py-24 lg:py-32">
+        <div className="container px-4 md:px-6">
+          <div className="flex flex-col gap-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-3xl font-bold">Historique des conversions</h1>
+                <p className="text-muted-foreground">
+                  Retrouvez toutes vos conversions texte vers parole
+                </p>
+              </div>
+              <Link href="/text-to-speech">
+                <Button>
+                  <Volume2 className="mr-2 h-4 w-4" />
+                  Nouvelle conversion
+                </Button>
+              </Link>
+            </div>
+
+            {history.length === 0 ? (
+              <Card>
+                <CardContent className="flex flex-col items-center justify-center py-12">
+                  <Volume2 className="h-12 w-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-semibold mb-2">Aucune conversion</h3>
+                  <p className="text-muted-foreground text-center mb-4">
+                    Vous n&apos;avez pas encore effectué de conversion. Commencez par convertir votre premier texte !
                   </p>
-                  <div className="mt-6">
-                    <Link href="/text-to-speech">
-                      <Button>Convertir du texte en parole</Button>
-                    </Link>
-                  </div>
-                </div>
-              )}
-            </CardContent>
-          </Card>
+                  <Link href="/text-to-speech">
+                    <Button>
+                      <Volume2 className="mr-2 h-4 w-4" />
+                      Convertir un texte
+                    </Button>
+                  </Link>
+                </CardContent>
+              </Card>
+            ) : (
+              <Card>
+                <CardHeader>
+                  <CardTitle>Liste des conversions</CardTitle>
+                  <CardDescription>
+                    Gérez vos conversions et téléchargez les fichiers audio
+                  </CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Texte</TableHead>
+                        <TableHead>Voix</TableHead>
+                        <TableHead>Vitesse</TableHead>
+                        <TableHead>Hauteur</TableHead>
+                        <TableHead className="text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {history.map((item) => (
+                        <TableRow key={item.id}>
+                          <TableCell>
+                            {format(new Date(item.createdAt), 'dd/MM/yyyy HH:mm')}
+                          </TableCell>
+                          <TableCell className="max-w-[300px] truncate">
+                            {item.text}
+                          </TableCell>
+                          <TableCell>
+                            <Badge className={getVoiceBadgeColor(item.voice)}>
+                              {item.voice}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>{item.speed}x</TableCell>
+                          <TableCell>{item.pitch}x</TableCell>
+                          <TableCell className="text-right">
+                            <div className="flex justify-end gap-2">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handlePlay(item.id)}
+                              >
+                                {playingId === item.id ? (
+                                  <Pause className="h-4 w-4" />
+                                ) : (
+                                  <Play className="h-4 w-4" />
+                                )}
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDownload(item.id)}
+                              >
+                                <Download className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={() => handleDelete(item.id)}
+                                className="text-destructive hover:text-destructive"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            )}
+          </div>
         </div>
       </main>
-      
-      <Footer/>
+      <Footer />
     </div>
   )
 }

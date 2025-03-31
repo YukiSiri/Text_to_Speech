@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,8 +8,44 @@ import { Checkbox } from "@/components/ui/checkbox"
 import { ArrowRight, User, Mail, Lock, Facebook, Twitter, Github } from "lucide-react"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/hooks/useAuth"
+import { toast } from "sonner"
 
 export default function SignupPage() {
+  const [prenom, setPrenom] = useState("")
+  const [nom, setNom] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
+  const [confirmPassword, setConfirmPassword] = useState("")
+  const [terms, setTerms] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
+  const { register } = useAuth()
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault()
+
+    if (password !== confirmPassword) {
+      toast.error("Les mots de passe ne correspondent pas")
+      return
+    }
+
+    if (!terms) {
+      toast.error("Vous devez accepter les conditions d'utilisation")
+      return
+    }
+
+    setIsLoading(true)
+
+    try {
+      await register(prenom, nom, email, password)
+      toast.success("Inscription réussie !")
+    } catch (error) {
+      toast.error(error instanceof Error ? error.message : "Erreur lors de l'inscription")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   return (
     <div className="flex min-h-screen justify-center items-center flex-col">
       <Nav />
@@ -19,7 +56,7 @@ export default function SignupPage() {
               <h1 className="text-3xl font-bold">Créer un compte</h1>
               <p className="text-muted-foreground">Inscrivez-vous pour accéder à toutes nos fonctionnalités</p>
             </div>
-            <div className="space-y-4">
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label
@@ -29,7 +66,14 @@ export default function SignupPage() {
                     Prénom
                   </label>
                   <div className="relative">
-                    <Input id="first-name" placeholder="Marie" className="pl-10" />
+                    <Input 
+                      id="first-name" 
+                      placeholder="Marie" 
+                      className="pl-10"
+                      value={prenom}
+                      onChange={(e) => setPrenom(e.target.value)}
+                      required
+                    />
                     <User className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                   </div>
                 </div>
@@ -40,7 +84,13 @@ export default function SignupPage() {
                   >
                     Nom
                   </label>
-                  <Input id="last-name" placeholder="Dupont" />
+                  <Input 
+                    id="last-name" 
+                    placeholder="Dupont"
+                    value={nom}
+                    onChange={(e) => setNom(e.target.value)}
+                    required
+                  />
                 </div>
               </div>
               <div className="space-y-2">
@@ -51,7 +101,15 @@ export default function SignupPage() {
                   Email
                 </label>
                 <div className="relative">
-                  <Input id="email" type="email" placeholder="exemple@email.com" className="pl-10" />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="exemple@email.com" 
+                    className="pl-10"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    required
+                  />
                   <Mail className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
@@ -63,7 +121,15 @@ export default function SignupPage() {
                   Mot de passe
                 </label>
                 <div className="relative">
-                  <Input id="password" type="password" placeholder="••••••••" className="pl-10" />
+                  <Input 
+                    id="password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="pl-10"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                  />
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
@@ -75,12 +141,24 @@ export default function SignupPage() {
                   Confirmer le mot de passe
                 </label>
                 <div className="relative">
-                  <Input id="confirm-password" type="password" placeholder="••••••••" className="pl-10" />
+                  <Input 
+                    id="confirm-password" 
+                    type="password" 
+                    placeholder="••••••••" 
+                    className="pl-10"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                  />
                   <Lock className="absolute left-3 top-2.5 h-5 w-5 text-muted-foreground" />
                 </div>
               </div>
               <div className="flex items-center space-x-2">
-                <Checkbox id="terms" />
+                <Checkbox 
+                  id="terms" 
+                  checked={terms}
+                  onCheckedChange={(checked) => setTerms(checked as boolean)}
+                />
                 <label
                   htmlFor="terms"
                   className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
@@ -95,8 +173,8 @@ export default function SignupPage() {
                   </Link>
                 </label>
               </div>
-              <Button className="w-full gap-1">
-                S&apos;inscrire <ArrowRight className="h-4 w-4" />
+              <Button type="submit" className="w-full gap-1" disabled={isLoading}>
+                {isLoading ? "Inscription en cours..." : "S'inscrire"} <ArrowRight className="h-4 w-4" />
               </Button>
               <div className="relative flex items-center justify-center">
                 <span className="absolute inset-x-0 h-px bg-muted" />
@@ -119,7 +197,7 @@ export default function SignupPage() {
                   Se connecter
                 </Link>
               </div>
-            </div>
+            </form>
           </div>
         </div>
       </main>

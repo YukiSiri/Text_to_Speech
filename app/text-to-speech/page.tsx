@@ -45,15 +45,14 @@ const LANGUAGES = [
 ]
 
 const VOICE_TONES = [
-  { value: 0.25, label: "Très grave" },
-  { value: 0.5, label: "Grave" },
-  { value: 0.75, label: "Bas" },
-  { value: 1, label: "Normal" },
-  { value: 1.25, label: "Haut" },
-  { value: 1.5, label: "Aigu" },
-  { value: 2, label: "Très aigu" },
-  { value: 3, label: "Extrêmement aigu" },
-  { value: 4, label: "Maximum" }
+  { label: "Très grave", pitch: -20 },  // Pitch très bas
+  { label: "Grave", pitch: -10 },       // Pitch bas
+  { label: "Bas", pitch: -5 },          // Pitch légèrement bas
+  { label: "Normal", pitch: 0 },           // Pitch normal
+  { label: "Haut", pitch: 5 },          // Pitch légèrement haut
+  { label: "Aigu", pitch: 10 },          // Pitch haut
+  { label: "Très aigu", pitch: 15 },       // Pitch très haut
+  { label: "Extrêmement aigu", pitch: 20 }, // Pitch maximum
 ]
 
 export default function TextToSpeechPage() {
@@ -86,6 +85,26 @@ export default function TextToSpeechPage() {
       }
 
       setAudioUrl(result.audioUrl)
+
+      // Sauvegarder dans l'historique
+      const historyResponse = await fetch('/api/history', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          text,
+          voice: voiceSettings.gender.toLowerCase(),
+          speed: voiceSettings.speakingRate,
+          pitch: voiceSettings.pitch,
+          audioUrl: result.audioUrl
+        }),
+      })
+
+      if (!historyResponse.ok) {
+        throw new Error('Erreur lors de la sauvegarde dans l\'historique')
+      }
+
       toast.success("Conversion réussie !")
     } catch (error) {
       toast.error("Une erreur est survenue lors de la conversion")
@@ -227,7 +246,7 @@ export default function TextToSpeechPage() {
                       </SelectTrigger>
                       <SelectContent>
                         {VOICE_TONES.map((tone) => (
-                          <SelectItem key={tone.value} value={tone.value.toString()}>
+                          <SelectItem key={tone.pitch} value={tone.pitch.toString()}>
                             {tone.label}
                           </SelectItem>
                         ))}
