@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
         path: "/",
         secure: process.env.NODE_ENV === "production",
         domain: process.env.NODE_ENV === "production" && process.env.VERCEL_URL
-            ? `.${new URL(process.env.VERCEL_URL).hostname}`
+            ? `.${new URL(`https://${process.env.VERCEL_URL}`).hostname}`
             : undefined
       }
     },
