@@ -55,10 +55,13 @@ export function useAuth() {
 
   const logout = async () => {
     try {
-      await signOut({ redirect: false })
-      router.push('/')
+      await signOut({
+        redirect: true,
+        callbackUrl: '/'
+      })
     } catch (error) {
       console.error('Erreur lors de la déconnexion:', error)
+      router.push('/')
     }
   }
 

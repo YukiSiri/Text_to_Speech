@@ -32,7 +32,7 @@ export const authOptions: NextAuthOptions = {
             email: user.email,
             firstName: user.firstName,
             lastName: user.lastName,
-            name: `${user.firstName} ${user.lastName}` // Ajout du champ name pour compatibilité
+            name: `${user.firstName} ${user.lastName}`
           }
         } catch (error) {
           console.error("Erreur d'authentification:", error)
@@ -45,12 +45,17 @@ export const authOptions: NextAuthOptions = {
     strategy: 'jwt',
     maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
+  jwt: {
+    maxAge: 30 * 24 * 60 * 60, // 30 jours - pour correspondre à la session
+  },
   pages: {
     signIn: '/login',
-    error: '/login', // Page d'erreur d'authentification
+    error: '/login',
+    signOut: '/',
   },
   callbacks: {
     async jwt({ token, user }) {
+      // Mettre à jour le token seulement quand nécessaire
       if (user) {
         token.id = user.id
         token.firstName = user.firstName
@@ -77,9 +82,8 @@ export const authOptions: NextAuthOptions = {
         sameSite: "lax",
         path: "/",
         secure: process.env.NODE_ENV === "production",
-        domain: process.env.NODE_ENV === "production" && process.env.VERCEL_URL
-            ? `.${new URL(`https://${process.env.VERCEL_URL}`).hostname}`
-            : undefined
+        // Simplification du domaine pour éviter les problèmes
+        domain: undefined
       }
     },
     callbackUrl: {
