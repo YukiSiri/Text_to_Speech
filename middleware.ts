@@ -1,32 +1,27 @@
-import { withAuth } from 'next-auth/middleware'
-import { NextResponse } from 'next/server'
+import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
+import type { NextRequest } from 'next/server';
 
-export default withAuth(
-  function middleware(req) {
-    // Si l'utilisateur est sur la page de connexion ou d'inscription et qu'il est déjà connecté
-    if (
-      (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/sign-up') &&
-      req.nextauth.token
-    ) {
-      return NextResponse.redirect(new URL('/account', req.url))
+export async function middleware(req: NextRequest) {
+    const token = await getToken({
+        req,
+        secret: process.env.NEXTAUTH_SECRET
+    });
+
+    // Rediriger les utilisateurs connectés depuis login/signup vers account
+    if ((req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/sign-up') && token) {
+        return NextResponse.redirect(new URL('/account', req.url));
     }
 
-    return NextResponse.next()
-  },
-  {
-    callbacks: {
-      authorized: ({ token, req }) => {
-        // Ne pas vérifier l'authentification pour les pages de connexion et d'inscription
-        if (req.nextUrl.pathname === '/login' || req.nextUrl.pathname === '/sign-up') {
-          return true
-        }
-        // Vérifier l'authentification pour les autres routes protégées
-        return !!token
-      },
-    },
-  }
-)
+    // Rediriger les utilisateurs non connectés vers login
+    const protectedRoutes = ['/account', '/history'];
+    if (protectedRoutes.some(path => req.nextUrl.pathname.startsWith(path)) && !token) {
+        return NextResponse.redirect(new URL('/login', req.url));
+    }
+
+    return NextResponse.next();
+}
 
 export const config = {
-  matcher: ['/account/:path*', '/history/:path*', '/login', '/sign-up']
-} 
+    matcher: ['/account/:path*', '/history/:path*', '/login', '/sign-up']
+};
