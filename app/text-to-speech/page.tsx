@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -26,6 +26,8 @@ import { VoiceSettings } from "@/types/tts"
 import { toast } from "sonner"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 const LANGUAGES = [
   { code: "fr-FR", name: "Français" },
@@ -43,19 +45,17 @@ const LANGUAGES = [
   { code: "zh-CN", name: "Chinois (Simplifié)" },
   { code: "zh-TW", name: "Chinois (Traditionnel)" }
 ]
-
-const VOICE_TONES = [
-  { label: "Très grave", pitch: -20 },  // Pitch très bas
-  { label: "Grave", pitch: -10 },       // Pitch bas
-  { label: "Bas", pitch: -5 },          // Pitch légèrement bas
-  { label: "Normal", pitch: 0 },           // Pitch normal
-  { label: "Haut", pitch: 5 },          // Pitch légèrement haut
-  { label: "Aigu", pitch: 10 },          // Pitch haut
-  { label: "Très aigu", pitch: 15 },       // Pitch très haut
-  { label: "Extrêmement aigu", pitch: 20 }, // Pitch maximum
-]
-
 export default function TextToSpeechPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login'); // Redirect to login page if not authenticated
+      return;
+    }
+  }, [user, loading, router])
+
   const [text, setText] = useState("")
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
     language: "fr-FR",
@@ -229,29 +229,6 @@ export default function TextToSpeechPage() {
                       value={[voiceSettings.speakingRate]}
                       onValueChange={([value]) => setVoiceSettings(prev => ({ ...prev, speakingRate: value }))}
                     />
-                  </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="tone-select">Ton de voix</Label>
-                    <Select 
-                      value={voiceSettings.pitch.toString()} 
-                      onValueChange={(value) => {
-                        const pitchValue = parseFloat(value)
-                        setVoiceSettings(prev => ({ ...prev, pitch: pitchValue }))
-                        console.log('Ton de voix sélectionné:', pitchValue)
-                      }}
-                    >
-                      <SelectTrigger id="tone-select">
-                        <SelectValue placeholder="Sélectionnez un ton" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {VOICE_TONES.map((tone) => (
-                          <SelectItem key={tone.pitch} value={tone.pitch.toString()}>
-                            {tone.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
                   </div>
 
                   <div className="space-y-2">

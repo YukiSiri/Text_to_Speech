@@ -4,9 +4,13 @@ import { useState } from "react"
 import Link from "next/link"
 import { Button } from "@/components/ui/button"
 import { Menu, X } from "lucide-react"
+import { useAuth } from "@/hooks/useAuth"
+
 
 export function MobileNav() {
   const [isOpen, setIsOpen] = useState(false)
+  const { user } = useAuth()
+
 
   return (
     <div className="md:hidden flex justify-end">
@@ -36,14 +40,19 @@ export function MobileNav() {
               Qui sommes-nous ?
             </Link>
             <div className="flex flex-col w-full gap-2 pt-4">
+            {!user && (
               <Link
                 href="#"
                 className="rounded-lg border border-black px-4 py-1 flex items-center justify-center text-lg font-medium transition-all duration-200 hover:border-primary hover:bg-primary hover:text-white focus:ring focus:ring-primary/50 w-full"
                 onClick={() => setIsOpen(false)}
               >
                 Connexion
+              </Link>)}
+
+              <Link  href={user ? "/account" : "/sign-up"} className="w-full">
+                <Button className="w-full" onClick={() => setIsOpen(false)}>{user ? "Profil" : "Commencer"}</Button>
               </Link>
-              <Button onClick={() => setIsOpen(false)}>Commencer</Button>
+              {/* <Button onClick={() => setIsOpen(false)}>Commencer</Button> */}
             </div>
           </nav>
         </div>

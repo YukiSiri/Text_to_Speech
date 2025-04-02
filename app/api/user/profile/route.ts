@@ -10,6 +10,8 @@ export async function PUT(request: Request) {
     const cookieStore = await cookies()
     const token = cookieStore.get('auth-token')?.value
 
+    console.log('Token:', token); // Log the token to see if it's being retrieved
+
     if (!token) {
       return NextResponse.json(
         { error: 'Non authentifié' },
@@ -20,6 +22,8 @@ export async function PUT(request: Request) {
     // Vérifier et décoder le token
     const decoded = verify(token, JWT_SECRET) as { userId: number }
     const { firstName, lastName, email } = await request.json()
+
+    console.log('UserData:', { firstName, lastName, email }); // Vérifiez que userData contient les bonnes valeurs
 
     // Vérifier si l'email est déjà utilisé par un autre utilisateur
     const existingUser = await prisma.user.findFirst({
