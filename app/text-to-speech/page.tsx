@@ -1,6 +1,6 @@
 "use client"
 
-import { useState, useRef } from "react"
+import { useState, useRef, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Textarea } from "@/components/ui/textarea"
 import { Slider } from "@/components/ui/slider"
@@ -26,6 +26,8 @@ import { VoiceSettings } from "@/types/tts"
 import { toast } from "sonner"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/hooks/useAuth"
+import { useRouter } from "next/navigation"
 
 const LANGUAGES = [
   { code: "fr-FR", name: "Français" },
@@ -56,6 +58,16 @@ const VOICE_TONES = [
 ]
 
 export default function TextToSpeechPage() {
+  const { user, loading } = useAuth()
+  const router = useRouter()
+
+  useEffect(() => {
+    if (!loading && !user) {
+      router.push('/login'); // Redirect to login page if not authenticated
+      return;
+    }
+  }, [user, loading, router])
+
   const [text, setText] = useState("")
   const [voiceSettings, setVoiceSettings] = useState<VoiceSettings>({
     language: "fr-FR",
