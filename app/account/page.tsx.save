@@ -1,5 +1,5 @@
 "use client"
-
+OOn
 import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -37,6 +37,36 @@ export default function AccountPage() {
       setIsLoading(false);
     }
   }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!userData) return
+
+
+    setIsSaving(true)
+    try {
+      console.log('User Data:', userData); // Add this line to check the value of userData
+
+
+      const response = await fetch('/api/user/profile', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(userData),
+      })
+
+      if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour du profil')
+      }
+
+      toast.success('Profil mis à jour avec succès')
+    } catch (error) {
+      console.error('Erreur:', error)
+      toast.error('Erreur lors de la mise à jour du profil')
+    } finally {
+      setIsSaving(false)
+    }
+  }
 
   if (isLoading) {
     return (
@@ -136,6 +166,25 @@ export default function AccountPage() {
                         defaultValue="Passionnée par la technologie vocale et l'IA."
                         rows={4}
                       />
+                    </div>
+                    <div className="flex justify-end">
+                      <Button 
+                        className="gap-1" 
+                        onClick={handleSaveProfile}
+                        disabled={isSaving}
+                      >
+                        {isSaving ? (
+                          <>
+                            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
+                            Enregistrement...
+                          </>
+                        ) : (
+                          <>
+                            <Save className="h-4 w-4" />
+                            Enregistrer
+                          </>
+                        )}
+                      </Button>
                     </div>
                   </div>
                 </div>
