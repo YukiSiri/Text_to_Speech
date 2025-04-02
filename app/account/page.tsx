@@ -1,15 +1,12 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
-import { User, Settings, Bell, Shield, LogOut, Camera, Save } from 'lucide-react'
+import { User, LogOut } from 'lucide-react'
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
-import Image from 'next/image'
 import { useAuth } from "@/hooks/useAuth"
-import { toast } from "sonner"
 
 interface UserData {
   id: string | number;
@@ -22,7 +19,6 @@ export default function AccountPage() {
   const [activeTab, setActiveTab] = useState("profile")
   const [userData, setUserData] = useState<UserData | null>(null)
   const [isLoading, setIsLoading] = useState(true)
-  const [isSaving, setIsSaving] = useState(false)
   const { user, logout } = useAuth()
 
   useEffect(() => {
