@@ -76,13 +76,22 @@ export default function HistoryPage() {
     }
   }, [user, loading, router, fetchHistory]);
 
-  const handlePlay = (id: number) => {
-    if (playingId === id) {
-      setPlayingId(null)
-    } else {
-      setPlayingId(id)
-    }
-  }
+  // const handlePlay = (id: number) => {
+  //   const item = history.find((item) => item.id === id);
+    
+  //   if (!item) {
+  //     console.error(`Aucun élément trouvé pour l'ID: ${id}`);
+  //     return;
+  //   }
+
+  
+  //   console.log(`Lecture du fichier: ${item.audioUrl}`);
+  
+  //   const audio = new Audio(item.audioUrl);
+  //   audio.play().catch((error) => console.error("Erreur lors de la lecture de l'audio:", error));
+  
+  //   setPlayingId((prev) => (prev === id ? null : id));
+  // };
 
   const handleDownload = (id: number) => {
     const item = history.find(item => item.id === id)
@@ -220,7 +229,7 @@ export default function HistoryPage() {
                           <TableCell>{item.pitch}x</TableCell>
                           <TableCell className="text-right">
                             <div className="flex justify-end gap-2">
-                              <Button
+                              {/* <Button
                                 variant="ghost"
                                 size="icon"
                                 onClick={() => handlePlay(item.id)}
@@ -230,7 +239,7 @@ export default function HistoryPage() {
                                 ) : (
                                   <Play className="h-4 w-4" />
                                 )}
-                              </Button>
+                              </Button> */}
                               <Button
                                 variant="ghost"
                                 size="icon"
