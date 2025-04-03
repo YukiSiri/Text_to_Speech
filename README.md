@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# SpeechCraft - Plateforme de Synthèse Vocale Multi-Fournisseurs
 
-## Getting Started
+## Technologies principales
 
-First, run the development server:
+### Frontend
+- **Framework** :
+    - Next.js 14 (App Router) avec React
+    - TypeScript pour le typage statique
+    - TailwindCSS pour le style et UI Components personnalisés
+    - Icônes Lucide
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+### Backend & API
+- **API Routes** :
+    - API Routes de Next.js (fonctions serverless)
+    - Architecture RESTful
+
+### Base de données
+- **SGBD** : SQL (PostgreSQL)
+- **ORM** : Prisma
+- **Schéma** :
+    - **Table User** : `id`, `firstName`, `lastName`, `email`, `password` (hashed), `createdAt`, `updatedAt`
+    - **Table ApiKeys** : relation avec `User` pour les clés API personnelles
+    - **Table Preferences** : paramètres utilisateur pour les services TTS
+
+## Authentification & Gestion utilisateur
+
+### Système d'authentification
+- **Hook personnalisé** : `useAuth` qui gère l'état d'authentification, connexion/déconnexion et informations utilisateur
+- **Session** : Gestion de session côté client et serveur
+- **Sécurité** : Protection des routes via middleware
+
+### Gestion de profil
+- Interface utilisateur pour modifier les informations personnelles
+- API endpoints pour la gestion du profil utilisateur
+
+## Intégration multi-fournisseurs TTS
+
+### Services de synthèse vocale
+- **ElevenLabs** : Synthèse vocale de pointe
+- **Google Cloud Text-to-Speech** : Voix haute qualité avec large support linguistique
+- **Amazon Polly** : Synthèse vocale naturelle AWS
+- **Microsoft Azure Text-to-Speech** : Voix neurales avancées
+
+### Orchestration des services
+- Sélection automatique du meilleur fournisseur selon préférences utilisateur, exigences linguistiques et caractéristiques vocales
+- Gestion sécurisée des clés API et rate limiting
+
+## Composants d'interface
+- UI Components personnalisés
+- Navigation responsive
+- Cards modulaires
+- Accordions pour la documentation
+- Forms avec validations
+- Notifications via Sonner (toasts)
+
+## Ressources utilisateur
+- Guide utilisateur
+- Documentation API
+- Tutoriels & Exemples
+- FAQ
+
+## Sécurité et gestion d'erreurs
+- Hachage des mots de passe
+- Protection CSRF
+- Validation des entrées
+- Gestion d'erreurs et logging
+
+## Structure des répertoires
+
+```
+/app
+  /account - Gestion du profil utilisateur
+  /about - Page d'information
+  /api
+    /auth - Endpoints d'authentification
+    /user - Gestion utilisateur
+    /tts - API de synthèse vocale
+/components
+  /ui - Composants d'interface réutilisables
+  /nav - Navigation
+  /footer - Pied de page
+/hooks
+  useAuth.ts - Logique d'authentification
+/lib
+  /db - Configuration Prisma et helpers BDD
+  /tts-providers - Intégrations avec les APIs TTS
+/prisma
+  schema.prisma - Schéma de base de données
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+SpeechCraft offre une plateforme complète de synthèse vocale multi-fournisseurs avec une architecture moderne, une gestion utilisateur robuste et une expérience utilisateur fluide.
