@@ -19,7 +19,7 @@ import {
   TableRow 
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Play, Pause, Download, Volume2, Trash2, Loader2 } from 'lucide-react'
+import { Download, Volume2, Trash2, Loader2 } from 'lucide-react'
 import { format } from "date-fns"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
@@ -39,7 +39,6 @@ interface HistoryItem {
 
 export default function HistoryPage() {
   const [history, setHistory] = useState<HistoryItem[]>([])
-  const [playingId, setPlayingId] = useState<number | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const { user, loading } = useAuth()
   const router = useRouter()
