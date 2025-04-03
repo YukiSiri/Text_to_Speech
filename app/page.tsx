@@ -4,8 +4,13 @@ import { Mic, Wand2, Globe2, Zap, CheckCircle2, Volume2, ArrowRight } from "luci
 import { AudioDemo } from "@/components/audio-demo"
 import { Nav } from "@/components/nav"
 import { Footer } from "@/components/footer"
+import { useAuth } from "@/hooks/useAuth"
+import Link from "next/link"
+
 
 export default function LandingPage() {
+  const { user } = useAuth()
+
   return (
     <div className="flex min-h-screen flex-col items-center justify-center">
       <Nav/>
@@ -23,12 +28,16 @@ export default function LandingPage() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2 min-[400px]:flex-row">
-                  <Button size="lg" className="gap-1">
+                  <Button 
+                    size="lg" 
+                    className="gap-1" 
+                    onClick={() => document.getElementById("demo")?.scrollIntoView({ behavior: "smooth" })}
+                  >
                     Essai gratuit <ArrowRight className="h-4 w-4" />
                   </Button>
-                  <Button size="lg" variant="outline">
-                    Voir les démos
-                  </Button>
+                  <Link href={user ? "/account" : "/sign-up"}>
+                    <Button>{user ? "Profil" : "Commencer"}</Button>
+                  </Link>
                 </div>
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <CheckCircle2 className="h-4 w-4 text-primary" />
